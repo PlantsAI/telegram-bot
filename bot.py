@@ -42,9 +42,13 @@ async def inline_caps(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def get_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    photo_path = 'io/input/image.jpg'
+    await context.bot.send_message(chat_id=update.effective_chat.id, text="Image received. Processing...")
     file = await update.message.photo[-1].get_file()
-    await file.download_to_drive('io/input/image.jpg')
-    await context.bot.send_message(chat_id=update.effective_chat.id, text="Image received")
+    await file.download_to_drive(photo_path)
+    class_names = plantsai(photo_path)
+    calss_names = " ".join(class_names)
+    await context.bot.send_message(chat_id=update.effective_chat.id, text=calss_names)
 
 
 if __name__ == '__main__':
