@@ -1,10 +1,4 @@
-python-telegram-bot
-matplotlib
-scikit-image
-scikit-learn
-docopt
-torch_geometric
-protobuf
-tensorboardX
-ninja
+python-dotenv
 opencv-python
+python-telegram-bot
+ultralytics

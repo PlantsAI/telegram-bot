@@ -1,7 +1,11 @@
 import os
 import logging
+from dotenv import load_dotenv
 from telegram import Update, InlineQueryResultArticle, InputTextMessageContent
 from telegram.ext import filters, MessageHandler, ApplicationBuilder, CommandHandler, ContextTypes, InlineQueryHandler
+import config
+from plantsai import PlantsAI
+
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -37,7 +41,14 @@ async def inline_caps(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.answer_inline_query(update.inline_query.id, results)
 
 
+async def get_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    file = await update.message.photo[-1].get_file()
+    await file.download_to_drive('io/input/image.jpg')
+    await context.bot.send_message(chat_id=update.effective_chat.id, text="Image received")
+
+
 if __name__ == '__main__':
+    load_dotenv()
     Token = os.getenv("Token")
     application = ApplicationBuilder().token(Token).build()
 
@@ -45,10 +56,14 @@ if __name__ == '__main__':
     echo_handler = MessageHandler(filters.TEXT & (~filters.COMMAND), echo)
     caps_handler = CommandHandler('caps', caps)
     inline_caps_handler = InlineQueryHandler(inline_caps)
+    photo_handler = MessageHandler(filters.PHOTO, get_photo)
 
     application.add_handler(start_handler)
     application.add_handler(echo_handler)
     application.add_handler(caps_handler)
     application.add_handler(inline_caps_handler)
+    application.add_handler(photo_handler)
+
+    plantsai = PlantsAI(weights_path=config.weights_path, image_size=config.image_size)
 
     application.run_polling()
